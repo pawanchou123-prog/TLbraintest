@@ -1,0 +1,577 @@
+{
+  "entities": {
+    "RoleMember": {
+      "title": "RoleMember",
+      "description": "Administrator or Question Manager role assignment document keyed by Firebase UID.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID of the privileged user." },
+        "email": { "type": "string", "description": "Verified Gmail address." },
+        "name": { "type": "string", "description": "Display name of the operator." },
+        "role": { "type": "string", "enum": ["admin", "question_manager"], "description": "Assigned role." },
+        "emailKey": { "type": "string", "description": "Optional sanitized email key linking to /allowed_question_managers/{emailKey}." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["uid", "email", "name", "role", "createdAt", "updatedAt"]
+    },
+    "AllowedQuestionManager": {
+      "title": "AllowedQuestionManager",
+      "description": "Main Admin managed allowlist and permission record for Question Management App operators.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Whitelisted lowercase Gmail address of the Question Manager." },
+        "managerName": { "type": "string", "description": "Full name of the Question Manager." },
+        "isActive": { "type": "boolean", "description": "True when authorized to access /question-manager; false when suspended." },
+        "canPublishDirectly": { "type": "boolean", "description": "True if Main Admin allows direct publishing; false requires Main Admin review." },
+        "canDeleteQuestions": { "type": "boolean", "description": "True if manager may delete their own unpublished questions." },
+        "addedByAdminEmail": { "type": "string", "description": "Main Admin Gmail who authorized this manager." },
+        "notes": { "type": "string", "description": "Optional Main Admin internal notes." },
+        "linkedUid": { "type": "string", "description": "Linked Firebase Auth UID once the Question Manager signs in." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "email",
+        "managerName",
+        "isActive",
+        "canPublishDirectly",
+        "canDeleteQuestions",
+        "addedByAdminEmail",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SubjectCatalog": {
+      "title": "SubjectCatalog",
+      "description": "Class-band subject organization controlled by Main Admin for Classes 1 to 12.",
+      "type": "object",
+      "properties": {
+        "classes1To5": { "type": "array", "description": "Subjects for Classes 1 to 5 (max 25)." },
+        "classes6To8": { "type": "array", "description": "Subjects for Classes 6 to 8 (max 25)." },
+        "classes9To10": { "type": "array", "description": "Subjects for Classes 9 to 10 (max 25)." },
+        "classes11To12": { "type": "array", "description": "Subjects for Classes 11 to 12 (max 30)." },
+        "updatedByEmail": { "type": "string", "description": "Main Admin Gmail who last updated the subject list." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "classes1To5",
+        "classes6To8",
+        "classes9To10",
+        "classes11To12",
+        "updatedByEmail",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "QuestionAuditLog": {
+      "title": "QuestionAuditLog",
+      "description": "Immutable audit record capturing question creation, editing, review submission, approval, rejection, publishing, deletion, and CSV imports.",
+      "type": "object",
+      "properties": {
+        "editorUid": { "type": "string", "description": "Firebase Auth UID of the Question Manager or Main Admin." },
+        "editorEmail": { "type": "string", "description": "Verified Gmail address of the editor." },
+        "editorRole": { "type": "string", "enum": ["main_admin", "question_manager"], "description": "Role of the editor." },
+        "actionType": { "type": "string", "description": "Action identifier such as create_draft, submit_review, approve_question, reject_question, publish_question, delete_question, csv_import." },
+        "questionId": { "type": "string", "description": "Target question ID or batch identifier." },
+        "questionSummary": { "type": "string", "description": "Short question summary or class/subject tag." },
+        "details": { "type": "string", "description": "Audit details or review reason." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "editorUid",
+        "editorEmail",
+        "editorRole",
+        "actionType",
+        "questionId",
+        "questionSummary",
+        "details",
+        "createdAt"
+      ]
+    },
+    "AllowedStudent": {
+      "title": "AllowedStudent",
+      "description": "Admin-managed invite-only student whitelist, ban control, and manual subscription record.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Whitelisted lowercase Gmail address." },
+        "studentName": { "type": "string", "description": "Full name of the student." },
+        "studentClass": { "type": "integer", "description": "Assigned school class from 1 to 12." },
+        "preferredLanguage": { "type": "string", "enum": ["en", "hi"], "description": "Default study language." },
+        "isBanned": { "type": "boolean", "description": "Whether student access is suspended by Admin." },
+        "subscriptionActive": { "type": "boolean", "description": "Manual activation toggle controlled by Admin." },
+        "subscriptionPlan": { "type": "string", "description": "Subscription plan label such as Rs. 50 / 3 Months." },
+        "paymentMethod": { "type": "string", "enum": ["upi", "cash", "manual"], "description": "Manual payment mode." },
+        "subscriptionStartMs": { "type": "integer", "description": "Subscription start epoch milliseconds." },
+        "subscriptionEndMs": { "type": "integer", "description": "Subscription expiry epoch milliseconds." },
+        "adminNotes": { "type": "string", "description": "Optional payment reference or notes." },
+        "linkedUid": { "type": "string", "description": "Linked Firebase UID once student signs in." },
+        "lastActiveSummary": { "type": "string", "description": "Latest daily activity summary string." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "email",
+        "studentName",
+        "studentClass",
+        "preferredLanguage",
+        "isBanned",
+        "subscriptionActive",
+        "subscriptionPlan",
+        "paymentMethod",
+        "subscriptionStartMs",
+        "subscriptionEndMs",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SubscriptionRecord": {
+      "title": "SubscriptionRecord",
+      "description": "Access request, manual Rs. 50 / 3-month payment verification request, or historical subscription transaction record.",
+      "type": "object",
+      "properties": {
+        "studentEmail": { "type": "string", "description": "Lowercase student Gmail address." },
+        "studentName": { "type": "string", "description": "Student full name." },
+        "studentClass": { "type": "integer", "description": "Student school class 1 to 12." },
+        "studentUid": { "type": "string", "description": "Optional linked Firebase UID of the student." },
+        "amountInr": { "type": "integer", "description": "Subscription fee in INR (standard 50)." },
+        "planLabel": { "type": "string", "description": "Plan label such as Rs. 50 / 3 Months." },
+        "paymentMethod": { "type": "string", "enum": ["upi", "cash", "access_request"], "description": "Manual payment or access request method." },
+        "referenceCode": { "type": "string", "description": "UPI reference number or cash handover note." },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected", "expired"], "description": "Verification status controlled strictly by Main Admin." },
+        "startMs": { "type": "integer", "description": "Approved subscription start epoch milliseconds." },
+        "endMs": { "type": "integer", "description": "Approved subscription expiry epoch milliseconds." },
+        "verificationNotes": { "type": "string", "description": "Internal administrator verification notes." },
+        "verifiedByAdminEmail": { "type": "string", "description": "Email of the Main Admin who verified or updated this record." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "studentEmail",
+        "studentName",
+        "studentClass",
+        "studentUid",
+        "amountInr",
+        "planLabel",
+        "paymentMethod",
+        "referenceCode",
+        "status",
+        "startMs",
+        "endMs",
+        "verificationNotes",
+        "verifiedByAdminEmail",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminAuditLog": {
+      "title": "AdminAuditLog",
+      "description": "Immutable audit record capturing important Main Admin actions, timestamps, and admin identity.",
+      "type": "object",
+      "properties": {
+        "adminUid": { "type": "string", "description": "Authenticated Firebase UID of the Main Admin." },
+        "adminEmail": { "type": "string", "description": "Verified Gmail of the Main Admin." },
+        "actionType": { "type": "string", "description": "Action category identifier." },
+        "targetId": { "type": "string", "description": "Target student email, UID, or document ID." },
+        "targetLabel": { "type": "string", "description": "Human-readable target name." },
+        "reasonOrDetails": { "type": "string", "description": "Reason or details of the administrative action." },
+        "pointsDelta": { "type": "integer", "description": "Points adjustment delta if applicable, else 0." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "adminUid",
+        "adminEmail",
+        "actionType",
+        "targetId",
+        "targetLabel",
+        "reasonOrDetails",
+        "pointsDelta",
+        "createdAt"
+      ]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private student profile containing progress, XP, levels, accuracy, badges, and preferences.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated Firebase UID." },
+        "email": { "type": "string", "description": "Authenticated Gmail address (PII isolated to owner and admin)." },
+        "displayName": { "type": "string", "description": "Student display name." },
+        "studentClass": { "type": "integer", "description": "Class 1 to 12." },
+        "schoolName": { "type": "string", "description": "Student school or institution name." },
+        "avatarId": { "type": "string", "description": "Selected profile emblem/avatar identifier." },
+        "language": { "type": "string", "enum": ["en", "hi"], "description": "Selected UI and quiz language." },
+        "xp": { "type": "integer", "description": "Total experience points earned." },
+        "totalPoints": { "type": "integer", "description": "Total quiz and game points scored." },
+        "level": { "type": "integer", "description": "Current player level." },
+        "quizzesPlayed": { "type": "integer", "description": "Completed quizzes count." },
+        "gamesPlayed": { "type": "integer", "description": "Completed 2D educational games count." },
+        "totalQuestionsAnswered": { "type": "integer", "description": "Total quiz questions attempted." },
+        "totalCorrectAnswers": { "type": "integer", "description": "Total quiz questions answered correctly." },
+        "badges": { "type": "array", "description": "Earned achievement badge identifiers (max 30)." },
+        "soundEnabled": { "type": "boolean", "description": "Whether game and quiz sound/haptic feedback is active." },
+        "termsAccepted": { "type": "boolean", "description": "Whether student accepted Terms and Conditions." },
+        "lastActiveDate": { "type": "string", "description": "ISO date YYYY-MM-DD of latest activity." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "userId",
+        "email",
+        "displayName",
+        "studentClass",
+        "language",
+        "xp",
+        "level",
+        "quizzesPlayed",
+        "gamesPlayed",
+        "totalQuestionsAnswered",
+        "totalCorrectAnswers",
+        "badges",
+        "soundEnabled",
+        "lastActiveDate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "PII-free public leaderboard entry for Daily, Weekly, Monthly, and All-Time rankings.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Student UID." },
+        "displayName": { "type": "string", "description": "Public display name without email or PII." },
+        "studentClass": { "type": "integer", "description": "Student class 1 to 12." },
+        "dailyXp": { "type": "integer", "description": "XP earned today." },
+        "dailyKey": { "type": "string", "description": "Date key YYYY-MM-DD." },
+        "weeklyXp": { "type": "integer", "description": "XP earned in current ISO week." },
+        "weeklyKey": { "type": "string", "description": "Week key YYYY-Www." },
+        "monthlyXp": { "type": "integer", "description": "XP earned in current month." },
+        "monthlyKey": { "type": "string", "description": "Month key YYYY-MM." },
+        "allTimeXp": { "type": "integer", "description": "Cumulative XP." },
+        "level": { "type": "integer", "description": "Current level." },
+        "accuracyPercent": { "type": "integer", "description": "Overall quiz accuracy percentage 0-100." },
+        "isActiveBoard": { "type": "boolean", "description": "True when eligible for active leaderboard queries." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "studentClass",
+        "dailyXp",
+        "dailyKey",
+        "weeklyXp",
+        "weeklyKey",
+        "monthlyXp",
+        "monthlyKey",
+        "allTimeXp",
+        "level",
+        "accuracyPercent",
+        "isActiveBoard",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Question": {
+      "title": "Question",
+      "description": "Educational quiz or GK question managed via Question Management Application (/question-manager) and consumed by Student App (/app).",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string", "description": "UID of Admin or Question Manager who created the question." },
+        "authorEmail": { "type": "string", "description": "Optional verified Gmail address of the question creator." },
+        "studentClass": { "type": "integer", "description": "0 for General Knowledge (GK), or 1 to 12 for school classes." },
+        "subject": { "type": "string", "description": "Subject name." },
+        "topic": { "type": "string", "description": "Optional topic or chapter title." },
+        "language": { "type": "string", "enum": ["en", "hi"], "description": "Question language." },
+        "questionText": { "type": "string", "description": "Question prompt text." },
+        "options": { "type": "array", "description": "Four multiple-choice answer strings." },
+        "correctIndex": { "type": "integer", "description": "Zero-based index (0 to 3) of the correct option." },
+        "explanation": { "type": "string", "description": "Detailed solution explanation." },
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"], "description": "Question difficulty tier." },
+        "points": { "type": "integer", "description": "XP points awarded for correct response." },
+        "timerSeconds": { "type": "integer", "description": "Per-question countdown timer in seconds." },
+        "imageUrl": { "type": "string", "description": "Optional HTTPS image URL." },
+        "isPublished": { "type": "boolean", "description": "False while in draft/review/rejected state; true only when approved and live for students." },
+        "reviewStatus": { "type": "string", "enum": ["draft", "pending_review", "approved", "rejected"], "description": "Editorial review lifecycle status." },
+        "reviewNotes": { "type": "string", "description": "Optional Main Admin approval or rejection notes." },
+        "lastEditedByUid": { "type": "string", "description": "Optional UID of most recent editor." },
+        "lastEditedByEmail": { "type": "string", "description": "Optional Gmail of most recent editor." },
+        "source": { "type": "string", "enum": ["manual", "gemini_ai", "csv_import"], "description": "Authoring origin." },
+        "attemptsCount": { "type": "integer", "description": "Total student attempts." },
+        "correctCount": { "type": "integer", "description": "Total correct student responses." },
+        "totalResponseTimeSec": { "type": "integer", "description": "Cumulative response seconds for average speed stats." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "authorId",
+        "studentClass",
+        "subject",
+        "language",
+        "questionText",
+        "options",
+        "correctIndex",
+        "explanation",
+        "difficulty",
+        "points",
+        "timerSeconds",
+        "imageUrl",
+        "isPublished",
+        "source",
+        "attemptsCount",
+        "correctCount",
+        "totalResponseTimeSec",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "QuizResult": {
+      "title": "QuizResult",
+      "description": "Immutable student score record from completing a subject quiz, GK test, or 2D brain game.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Student UID." },
+        "activityType": { "type": "string", "enum": ["quiz", "gk", "game"], "description": "Category of activity." },
+        "title": { "type": "string", "description": "Subject or game title." },
+        "studentClass": { "type": "integer", "description": "Class level 0 to 12." },
+        "score": { "type": "integer", "description": "Score points earned." },
+        "totalQuestions": { "type": "integer", "description": "Questions or rounds attempted." },
+        "correctAnswers": { "type": "integer", "description": "Correct answers or successful hits." },
+        "accuracyPercent": { "type": "integer", "description": "Accuracy percentage 0 to 100." },
+        "xpEarned": { "type": "integer", "description": "XP awarded." },
+        "durationSeconds": { "type": "integer", "description": "Elapsed time in seconds." },
+        "dateKey": { "type": "string", "description": "Date key YYYY-MM-DD." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "userId",
+        "activityType",
+        "title",
+        "studentClass",
+        "score",
+        "totalQuestions",
+        "correctAnswers",
+        "accuracyPercent",
+        "xpEarned",
+        "durationSeconds",
+        "dateKey",
+        "createdAt"
+      ]
+    },
+    "SupportThread": {
+      "title": "SupportThread",
+      "description": "Private 1-to-1 Customer Support conversation metadata between one Student and the Administrator.",
+      "type": "object",
+      "properties": {
+        "studentUid": { "type": "string", "description": "UID of the student owning this support thread." },
+        "studentName": { "type": "string", "description": "Student display name." },
+        "studentEmail": { "type": "string", "description": "Student Gmail address (PII restricted to owner and admin)." },
+        "studentClass": { "type": "integer", "description": "Student class 1 to 12." },
+        "lastMessage": { "type": "string", "description": "Preview of latest message." },
+        "unreadByAdmin": { "type": "boolean", "description": "True when student sent a new message." },
+        "unreadByStudent": { "type": "boolean", "description": "True when admin replied." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "studentUid",
+        "studentName",
+        "studentEmail",
+        "studentClass",
+        "lastMessage",
+        "unreadByAdmin",
+        "unreadByStudent",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SupportMessage": {
+      "title": "SupportMessage",
+      "description": "Individual message inside a private 1-to-1 Student-to-Admin support thread.",
+      "type": "object",
+      "properties": {
+        "studentUid": { "type": "string", "description": "Denormalized student UID matching parent thread." },
+        "senderUid": { "type": "string", "description": "UID of sender." },
+        "senderRole": { "type": "string", "enum": ["student", "admin"], "description": "Role of message sender." },
+        "senderName": { "type": "string", "description": "Display name of sender." },
+        "text": { "type": "string", "description": "Message body." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["studentUid", "senderUid", "senderRole", "senderName", "text", "createdAt"]
+    },
+    "AppConfig": {
+      "title": "AppConfig",
+      "description": "Global platform configuration including Leaderboard toggle, YouTube/WhatsApp redirects, Terms, and subscription details.",
+      "type": "object",
+      "properties": {
+        "leaderboardEnabled": { "type": "boolean", "description": "Global ON/OFF toggle for student leaderboards." },
+        "currentMonthKey": { "type": "string", "description": "Active YYYY-MM leaderboard period key." },
+        "youtubeUrl": { "type": "string", "description": "Official YouTube channel HTTPS URL." },
+        "whatsappUrl": { "type": "string", "description": "Official WhatsApp redirect HTTPS URL." },
+        "upiId": { "type": "string", "description": "Manual UPI ID or payment instruction." },
+        "subscriptionPriceText": { "type": "string", "description": "Subscription fee label e.g. Rs. 50 for 3 Months." },
+        "supportContactText": { "type": "string", "description": "Admin contact guidance shown on lock/subscription screens." },
+        "appVersionBanner": { "type": "string", "description": "Latest app update banner text." },
+        "termsAndConditionsEn": { "type": "string", "description": "Optional admin-customized English Terms and Conditions." },
+        "termsAndConditionsHi": { "type": "string", "description": "Optional admin-customized Hindi Terms and Conditions." },
+        "monthlyResetDay": { "type": "integer", "description": "Configured monthly leaderboard reset day (1 to 28)." },
+        "badgeRewardConfigNotes": { "type": "string", "description": "Configured badge and age-appropriate reward guidelines." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": [
+        "leaderboardEnabled",
+        "currentMonthKey",
+        "youtubeUrl",
+        "whatsappUrl",
+        "upiId",
+        "subscriptionPriceText",
+        "supportContactText",
+        "appVersionBanner",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "BannerItem": {
+      "title": "BannerItem",
+      "description": "Dashboard promotional banner using HTTPS image URLs.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Banner headline." },
+        "subtitle": { "type": "string", "description": "Banner subtext." },
+        "imageUrl": { "type": "string", "description": "HTTPS image URL." },
+        "actionUrl": { "type": "string", "description": "Optional HTTPS redirect link." },
+        "isActive": { "type": "boolean", "description": "Visibility flag." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["title", "subtitle", "imageUrl", "actionUrl", "isActive", "createdAt", "updatedAt"]
+    },
+    "PrizeItem": {
+      "title": "PrizeItem",
+      "description": "Monthly reward or gift item displayed to students with HTTPS image URL.",
+      "type": "object",
+      "properties": {
+        "rankLabel": { "type": "string", "description": "Rank tier e.g. Rank 1." },
+        "title": { "type": "string", "description": "Prize name." },
+        "description": { "type": "string", "description": "Prize details." },
+        "imageUrl": { "type": "string", "description": "HTTPS gift image URL." },
+        "isActive": { "type": "boolean", "description": "Visibility flag." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["rankLabel", "title", "description", "imageUrl", "isActive", "createdAt", "updatedAt"]
+    },
+    "AnnouncementItem": {
+      "title": "AnnouncementItem",
+      "description": "Broadcast announcement, notice, notification, or app update notice.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Notice headline." },
+        "message": { "type": "string", "description": "Detailed announcement content." },
+        "category": { "type": "string", "enum": ["announcement", "notice", "notification", "update"], "description": "Notice type." },
+        "targetClass": { "type": "integer", "description": "0 for all classes, or 1 to 12." },
+        "isActive": { "type": "boolean", "description": "Visibility flag." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["title", "message", "category", "targetClass", "isActive", "createdAt", "updatedAt"]
+    },
+    "WinnerRecord": {
+      "title": "WinnerRecord",
+      "description": "Archived monthly leaderboard winner entry.",
+      "type": "object",
+      "properties": {
+        "monthLabel": { "type": "string", "description": "Month label e.g. October 2026." },
+        "winnerName": { "type": "string", "description": "Student display name." },
+        "studentClass": { "type": "integer", "description": "Class 1 to 12." },
+        "rank": { "type": "integer", "description": "Winning rank 1 to 10." },
+        "xpScore": { "type": "integer", "description": "Winning monthly XP score." },
+        "prizeWon": { "type": "string", "description": "Awarded prize title." },
+        "isPublished": { "type": "boolean", "description": "Public visibility flag." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["monthLabel", "winnerName", "studentClass", "rank", "xpScore", "prizeWon", "isPublished", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": "RoleMember",
+      "description": "Administrator UID registry."
+    },
+    "/question_managers/{managerId}": {
+      "schema": "RoleMember",
+      "description": "Dedicated Question Management operator UID registry."
+    },
+    "/allowed_question_managers/{emailKey}": {
+      "schema": "AllowedQuestionManager",
+      "description": "Main Admin managed allowlist and granular permissions for Question Manager Gmail accounts."
+    },
+    "/subject_catalog/{catalogId}": {
+      "schema": "SubjectCatalog",
+      "description": "Global Class 1-12 subject list configuration controlled by Main Admin."
+    },
+    "/question_audit_logs/{logId}": {
+      "schema": "QuestionAuditLog",
+      "description": "Immutable audit trail of question edits, review actions, and CSV imports with editor identity and timestamp."
+    },
+    "/allowed_students/{emailKey}": {
+      "schema": "AllowedStudent",
+      "description": "Invite-only student Gmail whitelist, ban flags, and manual subscription dates."
+    },
+    "/subscription_records/{recordId}": {
+      "schema": "SubscriptionRecord",
+      "description": "Pending student access/payment verification requests and verified Rs. 50 / 3-month payment history."
+    },
+    "/admin_audit_logs/{logId}": {
+      "schema": "AdminAuditLog",
+      "description": "Immutable Main Admin action log with timestamps and verified admin identity."
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Private student profile, XP, levels, accuracy, and badges."
+    },
+    "/leaderboard_entries/{userId}": {
+      "schema": "LeaderboardEntry",
+      "description": "PII-free student leaderboard rankings across Daily, Weekly, Monthly, and All-Time."
+    },
+    "/questions/{questionId}": {
+      "schema": "Question",
+      "description": "Class 1-12 and GK bilingual question bank with draft review queue and item statistics."
+    },
+    "/quiz_results/{resultId}": {
+      "schema": "QuizResult",
+      "description": "Student quiz, GK, and 2D brain game score history."
+    },
+    "/support_threads/{studentUid}": {
+      "schema": "SupportThread",
+      "description": "Private 1-to-1 Customer Support thread header per student."
+    },
+    "/support_threads/{studentUid}/messages/{messageId}": {
+      "schema": "SupportMessage",
+      "description": "Private 1-to-1 messages strictly between Student and Admin."
+    },
+    "/app_config/{configId}": {
+      "schema": "AppConfig",
+      "description": "Global platform configuration document."
+    },
+    "/banners/{bannerId}": {
+      "schema": "BannerItem",
+      "description": "Promotional HTTPS image banners."
+    },
+    "/prizes/{prizeId}": {
+      "schema": "PrizeItem",
+      "description": "Monthly rewards and gift items."
+    },
+    "/announcements/{announcementId}": {
+      "schema": "AnnouncementItem",
+      "description": "Announcements, notices, notifications, and app update alerts."
+    },
+    "/winners_history/{winnerId}": {
+      "schema": "WinnerRecord",
+      "description": "Previous monthly leaderboard winners archive."
+    }
+  }
+}

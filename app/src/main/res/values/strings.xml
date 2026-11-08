@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">TL Brain Test</string>
+    <string name="brand_title">TL BRAIN TEST</string>
+    <string name="brand_tagline">Learn, Think, Play, Improve.</string>
+    <string name="owner_credit_label">Created &amp; Managed by PRITAM CHOUDHARY</string>
+    <string name="invite_only_portal_label">Invite-Only Student &amp; Admin Portal</string>
+    <string name="login_subtitle">Sign in using your administrator-approved Google account. Public registration is disabled.</string>
+    <string name="subscription_banner_title">Student Pass: Rs. 50 for 3 Months (Manual Activation)</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="cd_hero_banner">TL Brain Test cyber neural brain banner</string>
+    <string name="cd_brand_icon">TL Brain Test emblem</string>
+    <string name="portal_student">Student Panel</string>
+    <string name="portal_admin">Main Admin</string>
+    <string name="portal_question_studio">Question Studio</string>
+    <string name="admin_app_name">TL Admin</string>
+    <string name="question_manager_app_name">TL Question Manager</string>
+    <string name="qm_brand_title">TL BRAIN TEST – QUESTION MANAGEMENT</string>
+    <string name="qm_owner_subtitle">Application 3 (/question-manager) • Owner: PRITAM CHOUDHARY</string>
+</resources>

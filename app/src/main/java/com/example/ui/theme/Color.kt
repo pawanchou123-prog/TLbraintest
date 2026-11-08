@@ -1,0 +1,25 @@
+package com.example.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val ObsidianBlack = Color(0xFF070510)
+val CyberSurface = Color(0xFF120D24)
+val CyberSurfaceBright = Color(0xFF1D1538)
+val ElectricPurple = Color(0xFF8B5CF6)
+val DeepPurpleContainer = Color(0xFF2E1A66)
+val LuminousLavender = Color(0xFFF3E8FF)
+val NeonLavenderGlow = Color(0xFFC084FC)
+val DarkVioletInk = Color(0xFF140726)
+val VioletContainer = Color(0xFF281947)
+val SoftLavenderText = Color(0xFFE9D5FF)
+val MutedVioletLabel = Color(0xFFC4B5FD)
+val NeonEmerald = Color(0xFF10B981)
+val DeepEmeraldInk = Color(0xFF032218)
+val EmeraldContainer = Color(0xFF064E3B)
+val MintText = Color(0xFFD1FAE5)
+val NeonCrimson = Color(0xFFEF4444)
+val CrimsonContainer = Color(0xFF450A0A)
+val SoftRoseText = Color(0xFFFEE2E2)
+val GlowingPurpleBorder = Color(0xFF7C3AED)
+val SubtleVioletDivider = Color(0xFF3B2667)
+val PureWhite = Color(0xFFFFFFFF)

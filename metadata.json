@@ -1,0 +1,6 @@
+{
+  "name": "TL Brain Test",
+  "description": "Educational quiz, brain-training, and lightweight 2D gaming platform for Classes 1 to 12 by Pritam Choudhary.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
